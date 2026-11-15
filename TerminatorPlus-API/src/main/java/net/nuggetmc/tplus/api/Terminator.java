@@ -101,6 +101,15 @@ public interface Terminator {
     default void setDuelSkill(double aimErrorDegrees, int aimTicks, boolean useBandages, double meleeSkipChance) {
     }
 
+    /**
+     * NodesKrieg: human limits for a duel bot. After each swing it waits a random [swingGapMin]..[swingGapMax] ticks before
+     * the next (a player does not hit on the exact tick invulnerability ends); [missChance] of its swings whiff;
+     * [advancedPlay] false turns off crit setups, sprint-reset hits, combos and the punish plays; [speedFactor] scales
+     * how fast it walks (1 = unchanged).
+     */
+    default void setHumanLimits(int swingGapMin, int swingGapMax, double missChance, boolean advancedPlay, double speedFactor) {
+    }
+
     /** NodesKrieg: health the bot regains per tick on its own (players with full food get about 1 per 80 ticks). */
     default void setRegenPerTick(double regen) {
     }

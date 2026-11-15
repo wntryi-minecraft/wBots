@@ -245,6 +245,24 @@ public class Bot extends ServerPlayer implements Terminator {
     private boolean useBandages = true;
     private double meleeSkipChance = 0.0;
     private float regenPerTick = 0.025f;
+    // NodesKrieg human limits (see Terminator.setHumanLimits); the defaults change nothing
+    private int swingGapMin = 0, swingGapMax = 0;
+    private double missChance = 0.0;
+    private boolean advancedPlay = true;
+    private double speedFactor = 1.0;
+    private int nextSwingTick = 0;
+
+    @Override
+    public void setHumanLimits(int swingGapMin, int swingGapMax, double missChance, boolean advancedPlay, double speedFactor) {
+        this.swingGapMin = Math.max(0, swingGapMin);
+        this.swingGapMax = Math.max(this.swingGapMin, swingGapMax);
+        this.missChance = Math.max(0.0, Math.min(0.9, missChance));
+        this.advancedPlay = advancedPlay;
+        this.speedFactor = Math.max(0.3, Math.min(1.5, speedFactor));
+    }
+
+    /** False when this bot plays without crit setups, sprint-reset hits, combos and punish plays. */
+    public boolean advancedPlay() { return advancedPlay; }
     // NodesKrieg: for a few ticks after a hit the knockback owns the bot's horizontal motion (a player cannot walk
     // out of knockback either); walking, jumping and velocity writes keep its x / z meanwhile
     private int knockbackUntil = -1;
@@ -1145,7 +1163,9 @@ public class Bot extends ServerPlayer implements Terminator {
                 }
             }
         }
-        this.move(MoverType.SELF, new Vec3(velocity.getX(), y, velocity.getZ()));
+        // NodesKrieg: the duel speed factor scales every own step (walking, sprinting, jumps), never knockback
+        double step = aliveTicks < knockbackUntil ? 1.0 : speedFactor;
+        this.move(MoverType.SELF, new Vec3(velocity.getX() * step, y, velocity.getZ() * step));
     }
 
     private void updateMovementState() {
@@ -1342,6 +1362,21 @@ public class Bot extends ServerPlayer implements Terminator {
         }
         if (reachTo(entity) > interactionRange()) {
             CombatDebugger.log(this, "attack-skip", "reason=out-of-reach reach=" + fmt(reachTo(entity)));
+            return;
+        }
+        // NodesKrieg human limits: a random pause between swings, and some swings whiff
+        if (aliveTicks < nextSwingTick) {
+            CombatDebugger.log(this, "attack-skip", "reason=swing-gap left=" + (nextSwingTick - aliveTicks));
+            return;
+        }
+        if (swingGapMax > 0) {
+            nextSwingTick = aliveTicks + swingGapMin + (swingGapMax > swingGapMin
+                    ? java.util.concurrent.ThreadLocalRandom.current().nextInt(swingGapMax - swingGapMin + 1) : 0);
+        }
+        if (missChance > 0 && java.util.concurrent.ThreadLocalRandom.current().nextDouble() < missChance) {
+            faceLocation(entity.getLocation());
+            punch();
+            CombatDebugger.log(this, "attack-skip", "reason=missed");
             return;
         }
         faceLocation(entity.getLocation());

@@ -117,6 +117,10 @@ public final class CombatDirector {
                 && !BotCombatTiming.isCritWindow(bot)
                 && !BotCombatTiming.targetHasIFrames(target);
         boolean wantsSprintHit = meleeRange && canSpecial;
+        if (!bot.advancedPlay()) {   // NodesKrieg: a plain fighter, no crit setups or sprint-reset hits
+            wantsCritSetup = false;
+            wantsSprintHit = false;
+        }
 
         CombatIntent intent = switch (phase) {
             case MACE_CHARGING -> buildIntent(bot, target, distance, MovementBranchFamily.MACE, "",
@@ -276,7 +280,7 @@ public final class CombatDirector {
         }
 
         lastBranch = "scanner";
-        if (scanner.scan(bot, target, snapshot, combo)) {
+        if (bot.advancedPlay() && scanner.scan(bot, target, snapshot, combo)) {
             CombatDebugger.log(bot, "scanner-hit");
             logSweepBranchSkip(bot, target, distance, "higherPriority", "scanner");
             return true;
@@ -776,8 +780,8 @@ public final class CombatDirector {
         }
 
         snapshot.update(bot, target);
-        OpportunityScanner.ScannerPlan scannerPlan = scanner.plan(bot, target, snapshot, combo);
-        if (scannerPlan.present()) {
+        OpportunityScanner.ScannerPlan scannerPlan = bot.advancedPlay() ? scanner.plan(bot, target, snapshot, combo) : null;
+        if (scannerPlan != null && scannerPlan.present()) {
             OpportunityScanner.ScannerPlay play = scannerPlan.play();
             return buildIntent(bot, target, distance, play.family(), scannerPlan.playId(),
                     play.rangeBand(), play.actionIdentity(), play.interruptible(), play.lockTicks(),
