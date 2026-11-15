@@ -1,5 +1,6 @@
 package net.nuggetmc.tplus.bot.combat;
 
+import net.nuggetmc.tplus.api.WorldEdits;
 import net.nuggetmc.tplus.bot.Bot;
 import net.nuggetmc.tplus.bot.loadout.BotInventory;
 import org.bukkit.FluidCollisionMode;
@@ -66,7 +67,7 @@ public final class CrystalBehavior {
             bot.getActionController().recordDirectShortcut(bot, BotActionState.PLACING_BLOCK,
                     "direct-crystal-host-setType", inv.findMainInventory(host.placedMaterial()));
             CombatDebugger.blockPlace(bot, "crystal-host", host.placedMaterial(), host.block(), host.block().getType());
-            host.block().setType(host.placedMaterial());
+            WorldEdits.setType(host.block(), host.placedMaterial());
             consumeOne(inv, host.placedMaterial());
         }
 

@@ -480,7 +480,7 @@ public class Debugger {
     }
 
     public void setTarget(int n) {
-        print("This has been established as a feature as \"" + ChatColor.AQUA + "/bot settings setgoal" + ChatColor.RESET + "\"!");
+        print("This has been established as a feature as \"" + ChatColor.AQUA + "/tbot settings setgoal" + ChatColor.RESET + "\"!");
     }
 
     public void trackYVel() {

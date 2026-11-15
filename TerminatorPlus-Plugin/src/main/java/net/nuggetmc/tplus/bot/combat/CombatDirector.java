@@ -27,6 +27,7 @@ public final class CombatDirector {
     private final UtilityBehavior utility = new UtilityBehavior();
     private final ConsumableBehavior consumable = new ConsumableBehavior();
     private final ComboBehavior combo = new ComboBehavior();
+    private final XcCombatBehavior xc = new XcCombatBehavior();
     private final OpportunityScanner scanner = new OpportunityScanner();
     private final CombatSnapshot snapshot = new CombatSnapshot();
 
@@ -44,10 +45,12 @@ public final class CombatDirector {
     private static final String ACTION_TRIDENT = "director:trident";
     private static final String ACTION_PEARL = "director:pearl";
     private static final String ACTION_COBWEB = "director:cobweb";
+    private static final String ACTION_XC_GUN = "director:xc_gun";
     private static final String ACTION_SCANNER_PREFIX = "scanner:";
 
     public void cleanupBot(UUID botId) {
         combo.clear(botId);
+        xc.clear(botId);
     }
 
     public boolean tick(Bot bot, LivingEntity target) {
@@ -101,6 +104,7 @@ public final class CombatDirector {
             bot.setCombatIntent(CombatIntent.DEFAULT);
             return bot.getCombatIntent();
         }
+        bot.setFacingTarget(target);
 
         double distance = bot.getLocation().distance(target.getLocation());
         LiveDuelMetricsRecorder.recordTick(bot, target, distance);
@@ -206,6 +210,11 @@ public final class CombatDirector {
         if (!bot.getCombatState().markExecuted(alive)) {
             CombatDebugger.log(bot, "commit-skip",
                     "reason=already-executed phase=" + bot.getCombatState().getPhase() + " source=normal");
+            return true;
+        }
+
+        // NodesKrieg: an xc gun (and the bandage) outranks every vanilla branch while the target is out of blade reach
+        if (xc.tick(bot, target, distance)) {
             return true;
         }
 
@@ -743,6 +752,13 @@ public final class CombatDirector {
             return buildIntent(bot, target, distance, MovementBranchFamily.MOBILITY, "",
                     DesiredRangeBand.CLOSE, ACTION_COMBO, false, 20, "combo",
                     false, false, true, false, MeleeBehavior.ATTACK_RANGE);
+        }
+
+        // NodesKrieg: with an xc gun the bot keeps a gunfight's distance until the target closes to blade reach
+        if (distance > XcCombatBehavior.BLADE_RANGE && xc.hasGun(bot)) {
+            return buildIntent(bot, target, distance, MovementBranchFamily.PROJECTILE_RANGED, "",
+                    DesiredRangeBand.MID, ACTION_XC_GUN, true, 10, "xc_gun",
+                    false, false, false, false, 60.0);
         }
 
         if (!bot.isBotOnGround() && bot.getVelocity().getY() < -0.3

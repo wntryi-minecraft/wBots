@@ -93,6 +93,26 @@ public interface Terminator {
 
     void removeBot();
 
+    /**
+     * NodesKrieg duel skill. [aimErrorDegrees]: how far an xc gun shot strays from the aim (a random cone);
+     * [aimTicks]: ticks the bot holds its aim before it fires; [useBandages]: whether it bandages with xc consumables;
+     * [meleeSkipChance]: chance per tick to let a ready swing pass (slower reactions).
+     */
+    default void setDuelSkill(double aimErrorDegrees, int aimTicks, boolean useBandages, double meleeSkipChance) {
+    }
+
+    /** NodesKrieg: health the bot regains per tick on its own (players with full food get about 1 per 80 ticks). */
+    default void setRegenPerTick(double regen) {
+    }
+
+    /**
+     * NodesKrieg: replaces the bot's whole inventory with [storage] (the 36 main slots), [armor] (boots, leggings,
+     * chestplate, helmet) and [offhand], shows the armor and held item to viewers, and locks it as the bot's loadout (no
+     * pearl / wind charge refills).
+     */
+    default void applyLoadout(ItemStack[] storage, ItemStack[] armor, ItemStack offhand) {
+    }
+
     default boolean isAutoRespawnAllowed() {
         return true;
     }

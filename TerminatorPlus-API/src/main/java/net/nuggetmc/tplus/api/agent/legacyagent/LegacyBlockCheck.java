@@ -1,5 +1,6 @@
 package net.nuggetmc.tplus.api.agent.legacyagent;
 
+import net.nuggetmc.tplus.api.WorldEdits;
 import net.nuggetmc.tplus.api.Terminator;
 import net.nuggetmc.tplus.api.utils.BotUtils;
 
@@ -57,11 +58,11 @@ public class LegacyBlockCheck {
                 all.playSound(loc, Sound.BLOCK_STONE_PLACE, SoundCategory.BLOCKS, 1, 1);
             // The old path wrote a temporary block ItemStack here, which wiped
             // the selected hotbar slot. World placement is logical state only.
-            loc.getBlock().setType(placementMaterial);
+            WorldEdits.setType(loc.getBlock(), placementMaterial);
 
             Block under = loc.clone().add(0, -1, 0).getBlock();
             if (under.getType() == Material.LAVA) {
-                under.setType(placementMaterial);
+                WorldEdits.setType(under, placementMaterial);
             }
         }
     }
@@ -235,7 +236,7 @@ public class LegacyBlockCheck {
                 all.playSound(loc, Sound.BLOCK_STONE_PLACE, SoundCategory.BLOCKS, 1, 1);
             // The old path wrote a temporary block ItemStack here, which wiped
             // the selected hotbar slot. World placement is logical state only.
-            loc.getBlock().setType(agent.getPlacementMaterial());
+            WorldEdits.setType(loc.getBlock(), agent.getPlacementMaterial());
     	}
 
     	return false;
@@ -295,7 +296,7 @@ public class LegacyBlockCheck {
                 for (Player all : Bukkit.getOnlinePlayers())
                     all.playSound(loc, Sound.BLOCK_STONE_PLACE, SoundCategory.BLOCKS, 1, 1);
                 // Placement is logical world state and does not alter the held item.
-                loc.getBlock().setType(agent.getPlacementMaterial());
+                WorldEdits.setType(loc.getBlock(), agent.getPlacementMaterial());
             }
         }
     }

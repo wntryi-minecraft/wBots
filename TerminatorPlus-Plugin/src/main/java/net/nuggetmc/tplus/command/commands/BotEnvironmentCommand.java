@@ -62,7 +62,7 @@ public class BotEnvironmentCommand extends CommandInstance {
             coordinateStart = 2;
         }
         if (args.size() - coordinateStart != 3) {
-            sender.sendMessage(ChatColor.RED + "Usage: /bot environment inspect material <x> <y> <z>");
+            sender.sendMessage(ChatColor.RED + "Usage: /tbot environment inspect material <x> <y> <z>");
             return;
         }
         if (!(sender instanceof Player player)) {
@@ -95,14 +95,14 @@ public class BotEnvironmentCommand extends CommandInstance {
         switch (args.get(1).toLowerCase(Locale.ROOT)) {
             case "add" -> {
                 if (args.size() != 3) {
-                    sender.sendMessage(ChatColor.RED + "Usage: /bot environment custom-mob add <entity-type>");
+                    sender.sendMessage(ChatColor.RED + "Usage: /tbot environment custom-mob add <entity-type>");
                     return;
                 }
                 addCustomMob(sender, args.get(2));
             }
             case "remove" -> {
                 if (args.size() != 3) {
-                    sender.sendMessage(ChatColor.RED + "Usage: /bot environment custom-mob remove <entity-type>");
+                    sender.sendMessage(ChatColor.RED + "Usage: /tbot environment custom-mob remove <entity-type>");
                     return;
                 }
                 removeCustomMob(sender, args.get(2));
@@ -122,16 +122,16 @@ public class BotEnvironmentCommand extends CommandInstance {
             mobListType(sender, List.of(args.get(2)));
             return;
         }
-        sender.sendMessage(ChatColor.RED + "Usage: /bot environment mob-list-mode <get|set> [mode]");
+        sender.sendMessage(ChatColor.RED + "Usage: /tbot environment mob-list-mode <get|set> [mode]");
     }
 
     private void sendCanonicalHelp(CommandSender sender) {
         sender.sendMessage(ChatUtils.LINE);
         sender.sendMessage(ChatColor.GOLD + "Environment commands");
-        sender.sendMessage(ChatUtils.BULLET_FORMATTED + ChatColor.YELLOW + "/bot environment inspect material <x> <y> <z>");
-        sender.sendMessage(ChatUtils.BULLET_FORMATTED + ChatColor.YELLOW + "/bot environment solid-block <add|remove|list|clear>");
-        sender.sendMessage(ChatUtils.BULLET_FORMATTED + ChatColor.YELLOW + "/bot environment custom-mob <add|remove|list|clear>");
-        sender.sendMessage(ChatUtils.BULLET_FORMATTED + ChatColor.YELLOW + "/bot environment mob-list-mode <get|set> [mode]");
+        sender.sendMessage(ChatUtils.BULLET_FORMATTED + ChatColor.YELLOW + "/tbot environment inspect material <x> <y> <z>");
+        sender.sendMessage(ChatUtils.BULLET_FORMATTED + ChatColor.YELLOW + "/tbot environment solid-block <add|remove|list|clear>");
+        sender.sendMessage(ChatUtils.BULLET_FORMATTED + ChatColor.YELLOW + "/tbot environment custom-mob <add|remove|list|clear>");
+        sender.sendMessage(ChatUtils.BULLET_FORMATTED + ChatColor.YELLOW + "/tbot environment mob-list-mode <get|set> [mode]");
         sender.sendMessage(ChatUtils.LINE);
     }
 
@@ -206,7 +206,7 @@ public class BotEnvironmentCommand extends CommandInstance {
                 loc.setY(parseDoubleOrRelative(args.get(1), loc, 1));
                 loc.setZ(parseDoubleOrRelative(args.get(2), loc, 2));
             } catch (NumberFormatException e) {
-                sender.sendMessage("A valid location must be provided! " + ChatColor.YELLOW + "/bot addSolid <x> <y> <z>" + ChatColor.RESET);
+                sender.sendMessage("A valid location must be provided! " + ChatColor.YELLOW + "/tbot addSolid <x> <y> <z>" + ChatColor.RESET);
                 return;
             }
             if (!isLocationLoaded(loc)) {
@@ -217,8 +217,8 @@ public class BotEnvironmentCommand extends CommandInstance {
             mat = loc.getBlock().getType();
         } else {
             sender.sendMessage("Invalid syntax!");
-            sender.sendMessage("To specify a material: " + ChatColor.YELLOW + "/bot addSolid <material>" + ChatColor.RESET);
-            sender.sendMessage("To specify a location containing a material: " + ChatColor.YELLOW + "/bot addSolid <x> <y> <z>" + ChatColor.RESET);
+            sender.sendMessage("To specify a material: " + ChatColor.YELLOW + "/tbot addSolid <material>" + ChatColor.RESET);
+            sender.sendMessage("To specify a location containing a material: " + ChatColor.YELLOW + "/tbot addSolid <x> <y> <z>" + ChatColor.RESET);
             return;
         }
         if (mat == null) {
@@ -252,7 +252,7 @@ public class BotEnvironmentCommand extends CommandInstance {
                 loc.setY(parseDoubleOrRelative(args.get(1), loc, 1));
                 loc.setZ(parseDoubleOrRelative(args.get(2), loc, 2));
             } catch (NumberFormatException e) {
-                sender.sendMessage("A valid location must be provided! " + ChatColor.YELLOW + "/bot removeSolid <x> <y> <z>" + ChatColor.RESET);
+                sender.sendMessage("A valid location must be provided! " + ChatColor.YELLOW + "/tbot removeSolid <x> <y> <z>" + ChatColor.RESET);
                 return;
             }
             if (!isLocationLoaded(loc)) {
@@ -263,8 +263,8 @@ public class BotEnvironmentCommand extends CommandInstance {
             mat = loc.getBlock().getType();
         } else {
             sender.sendMessage("Invalid syntax!");
-            sender.sendMessage("To specify a material: " + ChatColor.YELLOW + "/bot removeSolid <material>" + ChatColor.RESET);
-            sender.sendMessage("To specify a location containing a material: " + ChatColor.YELLOW + "/bot removeSolid <x> <y> <z>" + ChatColor.RESET);
+            sender.sendMessage("To specify a material: " + ChatColor.YELLOW + "/tbot removeSolid <material>" + ChatColor.RESET);
+            sender.sendMessage("To specify a location containing a material: " + ChatColor.YELLOW + "/tbot removeSolid <x> <y> <z>" + ChatColor.RESET);
             return;
         }
         if (mat == null) {

@@ -1,5 +1,6 @@
 package net.nuggetmc.tplus.bot.combat;
 
+import net.nuggetmc.tplus.api.WorldEdits;
 import net.nuggetmc.tplus.bot.Bot;
 import net.nuggetmc.tplus.bot.loadout.BotInventory;
 import net.nuggetmc.tplus.bot.navigation.BukkitNavigationContext;
@@ -219,7 +220,7 @@ public final class PlayerTraversalActionExecutor {
 
         openable = (Openable) block.getBlockData();
         openable.setOpen(true);
-        block.setBlockData(openable, true);
+        WorldEdits.setBlockData(block, openable, true);
         syncDoorHalf(block, true);
         block.getWorld().playSound(block.getLocation(), Sound.BLOCK_WOODEN_DOOR_OPEN,
                 SoundCategory.BLOCKS, 1.0f, 1.0f);
@@ -351,7 +352,7 @@ public final class PlayerTraversalActionExecutor {
         if (!leasedItemIs(bot, held.getType())) return false;
         if (player(bot).getGameMode() != GameMode.CREATIVE
                 && !bot.getBotInventory().decrementMainInventorySlot(leasedHotbarSlot, 1)) return false;
-        target.setType(held.getType(), true);
+        WorldEdits.setType(target, held.getType(), true);
         target.getWorld().playSound(target.getLocation(), target.getBlockData().getSoundGroup().getPlaceSound(),
                 SoundCategory.BLOCKS, 1.0f, 1.0f);
         return true;
@@ -370,7 +371,7 @@ public final class PlayerTraversalActionExecutor {
         if (event.isCancelled()) return false;
         if (target.getType() != originalActionMaterial
                 || !leasedItemIs(bot, Material.WATER_BUCKET)) return false;
-        target.setType(Material.WATER, true);
+        WorldEdits.setType(target, Material.WATER, true);
         if (player(bot).getGameMode() != GameMode.CREATIVE) {
             bot.getBotInventory().setMainInventorySlot(leasedHotbarSlot, new ItemStack(Material.BUCKET));
         }
@@ -396,7 +397,7 @@ public final class PlayerTraversalActionExecutor {
                 || !leasedItemIs(bot, Material.TWISTING_VINES)) return false;
         if (player(bot).getGameMode() != GameMode.CREATIVE
                 && !bot.getBotInventory().decrementMainInventorySlot(leasedHotbarSlot, 1)) return false;
-        target.setType(Material.TWISTING_VINES, true);
+        WorldEdits.setType(target, Material.TWISTING_VINES, true);
         target.getWorld().playSound(target.getLocation(), Sound.BLOCK_WEEPING_VINES_PLACE,
                 SoundCategory.BLOCKS, 1.0f, 1.0f);
         return true;
@@ -416,7 +417,7 @@ public final class PlayerTraversalActionExecutor {
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled() || water.getType() != Material.WATER
                 || !leasedItemIs(bot, Material.BUCKET)) return false;
-        water.setType(Material.AIR, true);
+        WorldEdits.setType(water, Material.AIR, true);
         bot.getBotInventory().setMainInventorySlot(leasedHotbarSlot, new ItemStack(Material.WATER_BUCKET));
         water.getWorld().playSound(water.getLocation(), Sound.ITEM_BUCKET_FILL,
                 SoundCategory.PLAYERS, 1.0f, 1.0f);
@@ -620,7 +621,7 @@ public final class PlayerTraversalActionExecutor {
                 : block.getRelative(BlockFace.UP);
         if (other.getBlockData() instanceof Door otherDoor) {
             otherDoor.setOpen(open);
-            other.setBlockData(otherDoor, true);
+            WorldEdits.setBlockData(other, otherDoor, true);
         }
     }
 

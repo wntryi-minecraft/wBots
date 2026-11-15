@@ -1,5 +1,6 @@
 package net.nuggetmc.tplus.bot.combat;
 
+import net.nuggetmc.tplus.api.WorldEdits;
 import net.nuggetmc.tplus.bot.Bot;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -100,7 +101,7 @@ public final class UtilityBehavior {
     private static void placeBlock(Bot bot, Block block, Material material, String source) {
         Material previous = block.getType();
         CombatDebugger.blockPlace(bot, source, material, block, previous);
-        block.setType(material);
+        WorldEdits.setType(block, material);
     }
 
     private static boolean hasPlaceSupport(Block block) {

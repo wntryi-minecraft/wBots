@@ -77,14 +77,14 @@ public class BotCommand extends CommandInstance {
     )
     public void spawn(CommandSender sender, List<String> args) {
         if (args.isEmpty()) {
-            sendGroupHelp(sender, "/bot spawn", "single <name> [skin] [location]", "multiple <amount> <name> [skin] [location]");
+            sendGroupHelp(sender, "/tbot spawn", "single <name> [skin] [location]", "multiple <amount> <name> [skin] [location]");
             return;
         }
 
         switch (args.get(0).toLowerCase(Locale.ROOT)) {
             case "single" -> {
                 if (args.size() < 2) {
-                    sender.sendMessage(ChatColor.RED + "Usage: /bot spawn single <name> [skin] [location]");
+                    sender.sendMessage(ChatColor.RED + "Usage: /tbot spawn single <name> [skin] [location]");
                     return;
                 }
                 String skin = args.size() >= 3 ? args.get(2) : null;
@@ -93,7 +93,7 @@ public class BotCommand extends CommandInstance {
             }
             case "multiple" -> {
                 if (args.size() < 3) {
-                    sender.sendMessage(ChatColor.RED + "Usage: /bot spawn multiple <amount> <name> [skin] [location]");
+                    sender.sendMessage(ChatColor.RED + "Usage: /tbot spawn multiple <amount> <name> [skin] [location]");
                     return;
                 }
                 int amount;
@@ -107,7 +107,7 @@ public class BotCommand extends CommandInstance {
                 String location = args.size() >= 5 ? String.join(" ", args.subList(4, args.size())) : null;
                 createBots(sender, args.get(2), skin, location, amount);
             }
-            default -> sendGroupHelp(sender, "/bot spawn", "single <name> [skin] [location]", "multiple <amount> <name> [skin] [location]");
+            default -> sendGroupHelp(sender, "/tbot spawn", "single <name> [skin] [location]", "multiple <amount> <name> [skin] [location]");
         }
     }
 
@@ -122,7 +122,7 @@ public class BotCommand extends CommandInstance {
     )
     public void inspect(CommandSender sender, List<String> args) {
         if (args.isEmpty()) {
-            sendGroupHelp(sender, "/bot inspect", "list", "info [bot-name]", "weapons [bot-name]");
+            sendGroupHelp(sender, "/tbot inspect", "list", "info [bot-name]", "weapons [bot-name]");
             return;
         }
 
@@ -130,7 +130,7 @@ public class BotCommand extends CommandInstance {
             case "list" -> count(sender);
             case "info" -> info(sender, args.size() >= 2 ? args.get(1) : null);
             case "weapons" -> weapons(sender, args.size() >= 2 ? args.get(1) : null);
-            default -> sendGroupHelp(sender, "/bot inspect", "list", "info [bot-name]", "weapons [bot-name]");
+            default -> sendGroupHelp(sender, "/tbot inspect", "list", "info [bot-name]", "weapons [bot-name]");
         }
     }
 
@@ -149,7 +149,7 @@ public class BotCommand extends CommandInstance {
     )
     public void move(CommandSender sender, List<String> args) {
         if (args.isEmpty()) {
-            sendGroupHelp(sender, "/bot move", "gather", "scatter [radius]");
+            sendGroupHelp(sender, "/tbot move", "gather", "scatter [radius]");
             return;
         }
 
@@ -157,12 +157,12 @@ public class BotCommand extends CommandInstance {
             case "gather" -> gather(sender);
             case "scatter" -> {
                 if (args.size() > 2) {
-                    sender.sendMessage(ChatColor.RED + "Usage: /bot move scatter [radius]");
+                    sender.sendMessage(ChatColor.RED + "Usage: /tbot move scatter [radius]");
                     return;
                 }
                 scatter(sender, args.size() == 2 ? args.get(1) : null);
             }
-            default -> sendGroupHelp(sender, "/bot move", "gather", "scatter [radius]");
+            default -> sendGroupHelp(sender, "/tbot move", "gather", "scatter [radius]");
         }
     }
 
@@ -177,7 +177,7 @@ public class BotCommand extends CommandInstance {
     )
     public void equipment(CommandSender sender, List<String> args) {
         if (args.isEmpty()) {
-            sendGroupHelp(sender, "/bot equipment", "inventory <bot-name>", "give <item> [bot-name] [slot]",
+            sendGroupHelp(sender, "/tbot equipment", "inventory <bot-name>", "give <item> [bot-name] [slot]",
                     "armor <tier>", "loadout <name> [bot-name]", "mixed-loadout <mix> [bot-prefix]");
             return;
         }
@@ -185,7 +185,7 @@ public class BotCommand extends CommandInstance {
         switch (args.get(0).toLowerCase(Locale.ROOT)) {
             case "inventory" -> {
                 if (args.size() < 2) {
-                    sender.sendMessage(ChatColor.RED + "Usage: /bot equipment inventory <bot-name>");
+                    sender.sendMessage(ChatColor.RED + "Usage: /tbot equipment inventory <bot-name>");
                     return;
                 }
                 inventory(sender, args.get(1));
@@ -193,26 +193,26 @@ public class BotCommand extends CommandInstance {
             case "give" -> give(sender, args.subList(1, args.size()));
             case "armor" -> {
                 if (args.size() < 2) {
-                    sender.sendMessage(ChatColor.RED + "Usage: /bot equipment armor <tier>");
+                    sender.sendMessage(ChatColor.RED + "Usage: /tbot equipment armor <tier>");
                     return;
                 }
                 armor(sender, args.get(1));
             }
             case "loadout" -> {
                 if (args.size() < 2) {
-                    sender.sendMessage(ChatColor.RED + "Usage: /bot equipment loadout <name> [bot-name]");
+                    sender.sendMessage(ChatColor.RED + "Usage: /tbot equipment loadout <name> [bot-name]");
                     return;
                 }
                 loadout(sender, args.get(1), args.size() >= 3 ? args.get(2) : null);
             }
             case "mixed-loadout", "loadoutmix" -> {
                 if (args.size() < 2) {
-                    sender.sendMessage(ChatColor.RED + "Usage: /bot equipment mixed-loadout <mix> [bot-prefix]");
+                    sender.sendMessage(ChatColor.RED + "Usage: /tbot equipment mixed-loadout <mix> [bot-prefix]");
                     return;
                 }
                 loadoutMix(sender, args.get(1), args.size() >= 3 ? args.get(2) : null);
             }
-            default -> sendGroupHelp(sender, "/bot equipment", "inventory <bot-name>", "give <item> [bot-name] [slot]",
+            default -> sendGroupHelp(sender, "/tbot equipment", "inventory <bot-name>", "give <item> [bot-name] [slot]",
                     "armor <tier>", "loadout <name> [bot-name]", "mixed-loadout <mix> [bot-prefix]");
         }
     }
@@ -251,7 +251,7 @@ public class BotCommand extends CommandInstance {
             reset(sender);
             return;
         }
-        sendGroupHelp(sender, "/bot admin", "reset");
+        sendGroupHelp(sender, "/tbot admin", "reset");
     }
 
     public List<String> adminAutofill(CommandSender sender, String[] args) {
@@ -412,7 +412,7 @@ public class BotCommand extends CommandInstance {
     public void movementV2(CommandSender sender, @OptArg("on-off-status") String action) {
         MovementV2Action parsed = MovementV2Action.parse(action);
         if (parsed == null) {
-            sender.sendMessage(ChatColor.RED + "Usage: /bot movementv2 on|off|status");
+            sender.sendMessage(ChatColor.RED + "Usage: /tbot movementv2 on|off|status");
             return;
         }
         if (parsed != MovementV2Action.STATUS) {
@@ -450,13 +450,13 @@ public class BotCommand extends CommandInstance {
 
     @Command(
             name = "give",
-            desc = "Give an item to bot(s). Usage: /bot give <item> [bot-name] [slot]",
+            desc = "Give an item to bot(s). Usage: /tbot give <item> [bot-name] [slot]",
             autofill = "giveAutofill",
             visible = false
     )
     public void give(CommandSender sender, List<String> args) {
         if (args.isEmpty()) {
-            sender.sendMessage(ChatColor.RED + "Usage: /bot give <item> [bot-name] [slot]");
+            sender.sendMessage(ChatColor.RED + "Usage: /tbot give <item> [bot-name] [slot]");
             return;
         }
         String itemName = args.get(0);
@@ -749,7 +749,7 @@ public class BotCommand extends CommandInstance {
         String arg1 = args.isEmpty() ? null : canonicalSettingsAction(args.get(0));
         String arg2 = args.size() < 2 ? null : args.get(1);
 
-        String extra = ChatColor.GRAY + " [" + ChatColor.YELLOW + "/bot settings" + ChatColor.GRAY + "]";
+        String extra = ChatColor.GRAY + " [" + ChatColor.YELLOW + "/tbot settings" + ChatColor.GRAY + "]";
 
         if (arg1 == null || (!arg1.equalsIgnoreCase("combat-goal") && !arg1.equalsIgnoreCase("target-mobs") && !arg1.equalsIgnoreCase("target-player")
                 && !arg1.equalsIgnoreCase("show-in-player-list") && !arg1.equalsIgnoreCase("target-region")
@@ -882,7 +882,7 @@ public class BotCommand extends CommandInstance {
                 }
             } catch (NumberFormatException e) {
                 sender.sendMessage("The region bounds and weights must be valid numbers!");
-                sender.sendMessage("Correct syntax: " + ChatColor.YELLOW + "/bot settings target-region <x1> <y1> <z1> <x2> <y2> <z2> <wX> <wY> <wZ>"
+                sender.sendMessage("Correct syntax: " + ChatColor.YELLOW + "/tbot settings target-region <x1> <y1> <z1> <x2> <y2> <z2> <wX> <wY> <wZ>"
                         + ChatColor.RESET);
                 return;
             }
@@ -903,7 +903,7 @@ public class BotCommand extends CommandInstance {
             }
             Boolean enabled = parseToggleValue(arg2);
             if (enabled == null) {
-                sender.sendMessage(ChatColor.RED + "Usage: /bot settings auto-respawn <true|false|on|off>");
+                sender.sendMessage(ChatColor.RED + "Usage: /tbot settings auto-respawn <true|false|on|off>");
                 return;
             }
             respawn(sender, Boolean.toString(enabled));
@@ -915,7 +915,7 @@ public class BotCommand extends CommandInstance {
             movementV2(sender, arg2);
         } else if (arg1.equalsIgnoreCase("placement-material")) {
             if (arg2 == null) {
-                sender.sendMessage(ChatColor.RED + "Usage: /bot settings placement-material <material>");
+                sender.sendMessage(ChatColor.RED + "Usage: /tbot settings placement-material <material>");
                 return;
             }
             place(sender, arg2);
@@ -965,26 +965,26 @@ public class BotCommand extends CommandInstance {
     @Require(ADMIN_PERMISSION)
     public void debug(CommandSender sender, List<String> args) {
         if (args.isEmpty()) {
-            sendGroupHelp(sender, "/bot debug", "behavior <expression>", "combat <bot-name|all> <on|off>", "movement [bot-name]");
+            sendGroupHelp(sender, "/tbot debug", "behavior <expression>", "combat <bot-name|all> <on|off>", "movement [bot-name]");
             return;
         }
 
         String action = args.get(0).toLowerCase(Locale.ROOT);
         if (action.equals("behavior") || action.equals("expression")) {
             if (args.size() < 2) {
-                sender.sendMessage(ChatColor.RED + "Usage: /bot debug behavior <expression>");
+                sender.sendMessage(ChatColor.RED + "Usage: /tbot debug behavior <expression>");
                 return;
             }
             new Debugger(sender).execute(String.join(" ", args.subList(1, args.size())));
         } else if (action.equals("combat")) {
             if (args.size() != 3) {
-                sender.sendMessage(ChatColor.RED + "Usage: /bot debug combat <bot-name|all> <on|off>");
+                sender.sendMessage(ChatColor.RED + "Usage: /tbot debug combat <bot-name|all> <on|off>");
                 return;
             }
             combatDebug(sender, args.get(1), args.get(2));
         } else if (action.equals("movement")) {
             if (args.size() > 2) {
-                sender.sendMessage(ChatColor.RED + "Usage: /bot debug movement [bot-name]");
+                sender.sendMessage(ChatColor.RED + "Usage: /tbot debug movement [bot-name]");
                 return;
             }
             BotEnvironmentCommand environment = environmentCommand();
@@ -994,7 +994,7 @@ public class BotCommand extends CommandInstance {
             }
             environment.movementV2Status(sender, args.size() == 2 ? List.of(args.get(1)) : List.of());
         } else {
-            // Keep the old /bot debug <expression> form working.
+            // Keep the old /tbot debug <expression> form working.
             new Debugger(sender).execute(String.join(" ", args));
         }
     }
@@ -1090,7 +1090,7 @@ public class BotCommand extends CommandInstance {
         } else if (state.equalsIgnoreCase("off") || state.equalsIgnoreCase("false") || state.equalsIgnoreCase("0")) {
             turnOn = false;
         } else {
-            sender.sendMessage(ChatColor.RED + "Usage: /bot combatdebug <botName|all> <on|off>");
+            sender.sendMessage(ChatColor.RED + "Usage: /tbot combatdebug <botName|all> <on|off>");
             return;
         }
         String debugDir = new java.io.File(plugin.getDataFolder(), "debug").getAbsolutePath();
@@ -1182,7 +1182,7 @@ public class BotCommand extends CommandInstance {
             radius = parseScatterRadius(radiusText);
         } catch (IllegalArgumentException e) {
             sender.sendMessage(ChatColor.RED + e.getMessage());
-            sender.sendMessage(ChatColor.GRAY + "Usage: /bot move scatter [radius] (default "
+            sender.sendMessage(ChatColor.GRAY + "Usage: /tbot move scatter [radius] (default "
                     + DEFAULT_SCATTER_RADIUS + ").");
             return;
         }
@@ -1456,7 +1456,7 @@ public class BotCommand extends CommandInstance {
         }
         if (matches.size() > 1) {
             sender.sendMessage(ChatColor.RED + "Inventory editing is ambiguous: multiple bots use the name "
-                    + ChatColor.YELLOW + name + ChatColor.RED + ". Select the exact bot in /bot first.");
+                    + ChatColor.YELLOW + name + ChatColor.RED + ". Select the exact bot in /tbot first.");
             return;
         }
         if (plugin.getInventoryListener() == null) {
@@ -1481,7 +1481,7 @@ public class BotCommand extends CommandInstance {
 
         if (action == null) {
             sender.sendMessage(ChatUtils.LINE);
-            sender.sendMessage(ChatColor.GOLD + "Bot Presets" + ChatColor.GRAY + " [" + ChatColor.YELLOW + "/bot preset" + ChatColor.GRAY + "]");
+            sender.sendMessage(ChatColor.GOLD + "Bot Presets" + ChatColor.GRAY + " [" + ChatColor.YELLOW + "/tbot preset" + ChatColor.GRAY + "]");
             sender.sendMessage(ChatUtils.BULLET_FORMATTED + ChatColor.YELLOW + "save <name> <bot-name>" + ChatUtils.BULLET_FORMATTED + "Save a bot's state as a preset.");
             sender.sendMessage(ChatUtils.BULLET_FORMATTED + ChatColor.YELLOW + "apply <name> [bot-name]" + ChatUtils.BULLET_FORMATTED + "Apply a preset to one bot, or to ALL if no name given.");
             sender.sendMessage(ChatUtils.BULLET_FORMATTED + ChatColor.YELLOW + "list" + ChatUtils.BULLET_FORMATTED + "List all saved presets.");
@@ -1494,7 +1494,7 @@ public class BotCommand extends CommandInstance {
             case "list" -> {
                 List<String> names = presets.list();
                 if (names.isEmpty()) {
-                    sender.sendMessage("No presets saved yet. Use " + ChatColor.YELLOW + "/bot preset save <name> <bot-name>" + ChatColor.RESET + ".");
+                    sender.sendMessage("No presets saved yet. Use " + ChatColor.YELLOW + "/tbot preset save <name> <bot-name>" + ChatColor.RESET + ".");
                     return;
                 }
                 sender.sendMessage(ChatUtils.LINE);
@@ -1504,7 +1504,7 @@ public class BotCommand extends CommandInstance {
             }
             case "save" -> {
                 if (args.size() < 3) {
-                    sender.sendMessage(ChatColor.RED + "Usage: /bot preset save <preset-name> <bot-name>");
+                    sender.sendMessage(ChatColor.RED + "Usage: /tbot preset save <preset-name> <bot-name>");
                     return;
                 }
                 String presetName = args.get(1);
@@ -1525,7 +1525,7 @@ public class BotCommand extends CommandInstance {
             }
             case "load", "apply" -> {
                 if (args.size() < 2) {
-                    sender.sendMessage(ChatColor.RED + "Usage: /bot preset apply <preset-name> [bot-name]");
+                    sender.sendMessage(ChatColor.RED + "Usage: /tbot preset apply <preset-name> [bot-name]");
                     return;
                 }
                 String presetName = args.get(1);
@@ -1556,7 +1556,7 @@ public class BotCommand extends CommandInstance {
                     return;
                 }
                 if (args.size() < 2) {
-                    sender.sendMessage(ChatColor.RED + "Usage: /bot preset delete <preset-name>");
+                    sender.sendMessage(ChatColor.RED + "Usage: /tbot preset delete <preset-name>");
                     return;
                 }
                 String presetName = args.get(1);
@@ -1566,7 +1566,7 @@ public class BotCommand extends CommandInstance {
                     sender.sendMessage(ChatColor.RED + "Preset not found: " + ChatColor.YELLOW + presetName);
                 }
             }
-            default -> sender.sendMessage(ChatColor.RED + "Unknown action. See /bot preset for help.");
+            default -> sender.sendMessage(ChatColor.RED + "Unknown action. See /tbot preset for help.");
         }
     }
 
@@ -1595,7 +1595,7 @@ public class BotCommand extends CommandInstance {
 
     @Command(
             name = "loadout",
-            desc = "Apply a predefined combat loadout. Usage: /bot loadout <name> [bot-name]",
+            desc = "Apply a predefined combat loadout. Usage: /tbot loadout <name> [bot-name]",
             autofill = "loadoutAutofill",
             visible = false
     )
@@ -1681,7 +1681,7 @@ public class BotCommand extends CommandInstance {
 
     @Command(
             name = "loadoutmix",
-            desc = "Apply rotating combat loadouts. Usage: /bot loadoutmix <alltypes|core|problem> [bot-prefix]",
+            desc = "Apply rotating combat loadouts. Usage: /tbot loadoutmix <alltypes|core|problem> [bot-prefix]",
             autofill = "loadoutMixAutofill",
             visible = false
     )

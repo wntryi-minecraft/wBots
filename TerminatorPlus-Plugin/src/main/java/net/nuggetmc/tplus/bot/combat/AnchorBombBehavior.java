@@ -1,5 +1,6 @@
 package net.nuggetmc.tplus.bot.combat;
 
+import net.nuggetmc.tplus.api.WorldEdits;
 import net.nuggetmc.tplus.bot.Bot;
 import net.nuggetmc.tplus.bot.loadout.BotInventory;
 import org.bukkit.FluidCollisionMode;
@@ -71,14 +72,14 @@ public final class AnchorBombBehavior {
 
         bot.getActionController().recordDirectShortcut(bot, BotActionState.ANCHOR_SEQUENCE,
                 "direct-anchor-place-charge-explode", inv.findMainInventory(Material.RESPAWN_ANCHOR));
-        placeAt.setType(Material.RESPAWN_ANCHOR);
+        WorldEdits.setType(placeAt, Material.RESPAWN_ANCHOR);
         consumeOne(inv, Material.RESPAWN_ANCHOR);
         consumeOne(inv, Material.GLOWSTONE);
         bot.faceLocation(boom);
         bot.punch();
 
         // Replace with air before detonating so the block-form anchor doesn't absorb the blast.
-        placeAt.setType(Material.AIR);
+        WorldEdits.setType(placeAt, Material.AIR);
         world.createExplosion(boom, 5.0f, false, true, bot.getBukkitEntity());
         world.playSound(boom, Sound.BLOCK_RESPAWN_ANCHOR_DEPLETE, 1f, 0.7f);
         CombatDebugger.log(bot, "anchor-boom", "dist=" + String.format("%.2f", distance));

@@ -1,5 +1,6 @@
 package net.nuggetmc.tplus.bot;
 
+import net.nuggetmc.tplus.api.WorldEdits;
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.network.protocol.Packet;
@@ -238,6 +239,80 @@ public class Bot extends ServerPlayer implements Terminator {
         return bot;
     }
 
+    // NodesKrieg duel skill (see Terminator.setDuelSkill)
+    private double aimErrorDegrees = 2.0;
+    private int aimTicks = 6;
+    private boolean useBandages = true;
+    private double meleeSkipChance = 0.0;
+    private float regenPerTick = 0.025f;
+    // NodesKrieg: for a few ticks after a hit the knockback owns the bot's horizontal motion (a player cannot walk
+    // out of knockback either); walking, jumping and velocity writes keep its x / z meanwhile
+    private int knockbackUntil = -1;
+    // NodesKrieg: while fighting, the bot looks at its opponent instead of along its path (a player strafes looking at
+    // whoever they fight); while it aims a gun the aim owns its facing for a few ticks
+    private org.bukkit.entity.LivingEntity facingTarget;
+    private int facingTargetTick = -100;
+    private int faceLockUntil = -1;
+    private boolean faceLockBypass;
+
+    @Override
+    public void setRegenPerTick(double regen) {
+        this.regenPerTick = (float) Math.max(0.0, regen);
+    }
+
+    /** The opponent the combat director planned against this tick (the bot faces it while it walks). */
+    public void setFacingTarget(org.bukkit.entity.LivingEntity target) {
+        this.facingTarget = target;
+        this.facingTargetTick = aliveTicks;
+    }
+
+    /** Faces [loc] and keeps that facing for [ticks] ticks against every other facing change (gun aim). */
+    public void faceLocked(Location loc, int ticks) {
+        faceLockBypass = true;
+        try {
+            faceLocation(loc);
+        } finally {
+            faceLockBypass = false;
+        }
+        faceLockUntil = aliveTicks + Math.max(1, ticks);
+    }
+
+    private boolean faceLocked() {
+        return !faceLockBypass && aliveTicks < faceLockUntil;
+    }
+
+    @Override
+    public void setDuelSkill(double aimErrorDegrees, int aimTicks, boolean useBandages, double meleeSkipChance) {
+        this.aimErrorDegrees = Math.max(0.0, aimErrorDegrees);
+        this.aimTicks = Math.max(1, aimTicks);
+        this.useBandages = useBandages;
+        this.meleeSkipChance = Math.max(0.0, Math.min(0.95, meleeSkipChance));
+    }
+
+    @Override
+    public void applyLoadout(org.bukkit.inventory.ItemStack[] storage, org.bukkit.inventory.ItemStack[] armor,
+                             org.bukkit.inventory.ItemStack offhand) {
+        org.bukkit.inventory.PlayerInventory inv = getBukkitEntity().getInventory();
+        inv.clear();
+        inv.setStorageContents(storage);
+        inv.setArmorContents(armor);
+        inv.setItemInOffHand(offhand);
+        sendPacket(new ClientboundSetEquipmentPacket(getId(), List.of(
+                new Pair<>(EquipmentSlot.FEET, getItemBySlot(EquipmentSlot.FEET).copy()),
+                new Pair<>(EquipmentSlot.LEGS, getItemBySlot(EquipmentSlot.LEGS).copy()),
+                new Pair<>(EquipmentSlot.CHEST, getItemBySlot(EquipmentSlot.CHEST).copy()),
+                new Pair<>(EquipmentSlot.HEAD, getItemBySlot(EquipmentSlot.HEAD).copy()),
+                new Pair<>(EquipmentSlot.OFFHAND, getItemBySlot(EquipmentSlot.OFFHAND).copy())
+        )));
+        refreshMainHandEquipment();
+        getBotInventory().markLoadoutApplied();
+    }
+
+    public double getAimErrorDegrees() { return aimErrorDegrees; }
+    public int getAimTicks() { return aimTicks; }
+    public boolean usesBandages() { return useBandages; }
+    public double getMeleeSkipChance() { return meleeSkipChance; }
+
     @Override
     public String getBotName() {
         return displayName;
@@ -328,7 +403,13 @@ public class Bot extends ServerPlayer implements Terminator {
 
     @Override
     public void setVelocity(Vector vector) {
-        this.velocity = vector;
+        this.velocity = keepKnockback(vector);
+    }
+
+    /** [next] with the current horizontal velocity while knockback is still carrying the bot. */
+    private Vector keepKnockback(Vector next) {
+        if (aliveTicks >= knockbackUntil || next == null) return next;
+        return new Vector(velocity.getX(), next.getY(), velocity.getZ());
     }
 
     @Override
@@ -588,6 +669,15 @@ public class Bot extends ServerPlayer implements Terminator {
     }
 
     private void faceMovement(Vector direction) {
+        org.bukkit.entity.LivingEntity t = facingTarget;
+        if (t != null && aliveTicks - facingTargetTick <= 5 && t.isValid() && t.getWorld().equals(getBukkitEntity().getWorld())
+                && t.getLocation().distanceSquared(getLocation()) <= 32 * 32) {
+            // look at the opponent's chest from the eyes, the way a player strafes
+            Vector look = t.getLocation().toVector().add(new Vector(0, t.getHeight() * 0.62, 0))
+                    .subtract(getBukkitEntity().getEyeLocation().toVector());
+            faceLocation(getLocation().clone().add(look));
+            return;
+        }
         if (direction != null && direction.lengthSquared() > 1.0e-6) {
             faceLocation(getLocation().clone().add(direction));
         }
@@ -793,7 +883,7 @@ public class Bot extends ServerPlayer implements Terminator {
 
         float health = getHealth();
         float maxHealth = getMaxHealth();
-        float regenAmount = 0.025f;
+        float regenAmount = regenPerTick;
         float amount;
 
         if (health < maxHealth - regenAmount) {
@@ -1170,7 +1260,7 @@ public class Bot extends ServerPlayer implements Terminator {
     public void jump(Vector vel) {
         if (jumpTicks == 0 && groundTicks > 1) {
             jumpTicks = 4;
-            velocity = vel;
+            velocity = keepKnockback(vel);
             jumpedThisTick = true;
             if (CombatDebugger.isOn(this)) {
                 CombatDebugger.log(this, "move-jump", "accepted vel=" + fmtVec(vel));
@@ -1206,7 +1296,7 @@ public class Bot extends ServerPlayer implements Terminator {
         if (sum.length() > max) sum.normalize().multiply(max);
         sum.setY(y);
 
-        velocity = sum;
+        velocity = keepKnockback(sum);
     }
 
     /**
@@ -1218,11 +1308,16 @@ public class Bot extends ServerPlayer implements Terminator {
         Vector routed = vel == null ? new Vector() : vel.clone().setY(0);
         if (routed.length() > 0.4) routed.normalize().multiply(0.4);
         routed.setY(y);
-        velocity = routed;
+        velocity = keepKnockback(routed);
     }
 
     @Override
     public void attack(org.bukkit.entity.Entity entity) {
+        // NodesKrieg: no hits through walls: a player cannot reach what they cannot see
+        if (!getBukkitEntity().hasLineOfSight(entity)) {
+            CombatDebugger.log(this, "attack-skip", "reason=no-line-of-sight");
+            return;
+        }
         faceLocation(entity.getLocation());
         if (actionController.blocksCombatAction()) {
             CombatDebugger.log(this, "attack-skip",
@@ -1482,7 +1577,7 @@ public class Bot extends ServerPlayer implements Terminator {
         return pinnedSpawn == null ? null : pinnedSpawn.clone();
     }
 
-    /** Respawn point from {@code /bot setspawn}; kept across deaths, may be mid-air. */
+    /** Respawn point from {@code /tbot setspawn}; kept across deaths, may be mid-air. */
     public void setPinnedSpawn(Location location) {
         pinnedSpawn = location == null ? null : location.clone();
     }
@@ -1748,21 +1843,35 @@ public class Bot extends ServerPlayer implements Terminator {
             String heldType
     ) {}
 
+    /**
+     * Vanilla player knockback (NodesKrieg): every hit pushes 0.4 away from the attacker, a sprint hit or a Knockback
+     * enchant adds 0.5 per level on top, each push halving the motion the bot already had and lifting it by at most 0.4
+     * when it stands on the ground; knockback resistance scales it down. The push then carries the bot for a few ticks.
+     */
     private void kb(Location loc1, Location loc2, Entity attacker) {
-        Vector vel = loc1.toVector().subtract(loc2.toVector()).setY(0).normalize().multiply(0.3);
-
-        if (isBotOnGround()) vel.multiply(0.8).setY(0.4);
-        if (attacker.getBukkitEntity() instanceof Player && ((Player) attacker.getBukkitEntity()).getInventory().getItemInMainHand().getItemMeta() != null) {
-            if (((Player) attacker.getBukkitEntity()).getInventory().getItemInMainHand().getItemMeta().hasEnchant(Enchantment.KNOCKBACK) && attacker.getBukkitEntity() instanceof Player) {
-                int kbLevel = ((Player) attacker.getBukkitEntity()).getInventory().getItemInMainHand().getItemMeta().getEnchants().get(Enchantment.KNOCKBACK);
-                if (kbLevel == 1) {
-                    vel.multiply(1.05).setY(.4);
-                } else {
-                    vel.multiply(1.9).setY(.4);
-                }
-            }
+        Vector away = loc1.toVector().subtract(loc2.toVector()).setY(0);
+        if (away.lengthSquared() < 1.0e-6) away = new Vector(Math.random() - 0.5, 0, Math.random() - 0.5);
+        away.normalize();
+        double resistance = 0.0;
+        org.bukkit.attribute.AttributeInstance res = getBukkitEntity().getAttribute(org.bukkit.attribute.Attribute.KNOCKBACK_RESISTANCE);
+        if (res != null) resistance = Math.max(0.0, Math.min(1.0, res.getValue()));
+        double scale = 1.0 - resistance;
+        if (scale <= 0) return;
+        knockbackUntil = -1;
+        push(0.4 * scale, away);
+        double extra = 0;
+        if (attacker.getBukkitEntity() instanceof Player p) {
+            if (p.isSprinting()) extra += 1;
+            extra += p.getInventory().getItemInMainHand().getEnchantmentLevel(Enchantment.KNOCKBACK);
         }
-        velocity = vel;
+        if (extra > 0) push(0.5 * extra * scale, away);
+        knockbackUntil = aliveTicks + 6;
+    }
+
+    private void push(double strength, Vector away) {
+        Vector old = velocity.clone();
+        double y = isBotOnGround() ? Math.min(0.4, old.getY() / 2 + strength) : old.getY();
+        velocity = new Vector(old.getX() / 2 + away.getX() * strength, y, old.getZ() / 2 + away.getZ() * strength);
     }
 
     @Override
@@ -1792,11 +1901,13 @@ public class Bot extends ServerPlayer implements Terminator {
 
     @Override
     public void faceLocation(Location loc) {
+        if (faceLocked()) return;
         look(loc.toVector().subtract(getLocation().toVector()), false);
     }
 
     @Override
     public void look(BlockFace face) {
+        if (faceLocked()) return;
         look(face.getDirection(), face == BlockFace.DOWN || face == BlockFace.UP);
     }
 
@@ -1835,7 +1946,7 @@ public class Bot extends ServerPlayer implements Terminator {
 
         if (!LegacyMats.isSolid(block.getType())) {
             CombatDebugger.blockPlace(this, "bot-attemptBlockPlace", type, block, block.getType());
-            block.setType(type);
+            WorldEdits.setType(block, type);
             if (world != null) world.playSound(loc, Sound.BLOCK_STONE_PLACE, SoundCategory.BLOCKS, 1, 1);
         }
     }

@@ -29,6 +29,10 @@ public final class MeleeBehavior {
             CombatDebugger.log(bot, "melee-oor", "dist=" + String.format("%.2f", distance));
             return 0;
         }
+        if (bot.getMeleeSkipChance() > 0 && java.util.concurrent.ThreadLocalRandom.current().nextDouble() < bot.getMeleeSkipChance()) {
+            CombatDebugger.log(bot, "melee-skip", "reason=duel-skill");
+            return 0;
+        }
         ItemStack held = bot.getBotInventory().getSelected();
         if (!isMeleeOrEmpty(held)) {
             CombatDebugger.log(bot, "melee-skip", "reason=non-melee-held held=" + held.getType().name());

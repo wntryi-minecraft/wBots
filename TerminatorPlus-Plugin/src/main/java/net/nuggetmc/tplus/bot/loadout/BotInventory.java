@@ -50,7 +50,7 @@ public final class BotInventory {
      * When true, {@link #ensureMovementKit()} is a no-op — the bot's loadout
      * is considered authoritative, including the deliberate absence of pearls /
      * wind charges. Flipped on by {@link #markLoadoutApplied()} after
-     * {@code /bot loadout <name>} or a GUI save, flipped off by
+     * {@code /tbot loadout <name>} or a GUI save, flipped off by
      * {@link #markLoadoutCleared()} (the {@code clear} preset or a manual reset).
      *
      * <p>Without this flag a user who drags pearls out of the GUI sees them
@@ -88,7 +88,7 @@ public final class BotInventory {
 
     /**
      * Release the loadout lock so the baseline movement kit refill resumes.
-     * Called by the {@code clear} preset and by any future {@code /bot inv reset} path.
+     * Called by the {@code clear} preset and by any future {@code /tbot inv reset} path.
      */
     public void markLoadoutCleared() {
         saveForRespawn();

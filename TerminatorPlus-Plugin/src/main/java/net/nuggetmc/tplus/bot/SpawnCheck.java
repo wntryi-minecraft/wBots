@@ -1,7 +1,7 @@
 package net.nuggetmc.tplus.bot;
 
 /**
- * Result of validating a {@code /bot setspawn} location.
+ * Result of validating a {@code /tbot setspawn} location.
  *
  * @param problem    why the location was refused, or {@link Problem#NONE}
  * @param dropHeight how far a bot falls before landing; 0 when standing on ground

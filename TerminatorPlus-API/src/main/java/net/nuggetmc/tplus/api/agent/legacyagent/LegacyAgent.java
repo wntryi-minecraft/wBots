@@ -1,5 +1,6 @@
 package net.nuggetmc.tplus.api.agent.legacyagent;
 
+import net.nuggetmc.tplus.api.WorldEdits;
 import com.google.common.base.Optional;
 import net.nuggetmc.tplus.api.BotManager;
 import net.nuggetmc.tplus.api.Terminator;
@@ -556,9 +557,9 @@ public class LegacyAgent extends Agent {
             if (waterloggable) {
             	Waterlogged data = (Waterlogged)loc.getBlock().getBlockData();
             	data.setWaterlogged(true);
-            	loc.getBlock().setBlockData(data);
+            	WorldEdits.setBlockData(loc.getBlock(), data);
             } else
-            	loc.getBlock().setType(placeType);
+            	WorldEdits.setType(loc.getBlock(), placeType);
             world.playSound(loc, sound, 1, 1);
 
             if (itemType == Material.WATER_BUCKET) {
@@ -573,9 +574,9 @@ public class LegacyAgent extends Agent {
                         if (waterloggedNow) {
                         	Waterlogged data = (Waterlogged)loc.getBlock().getBlockData();
                         	data.setWaterlogged(false);
-                        	loc.getBlock().setBlockData(data);
+                        	WorldEdits.setBlockData(loc.getBlock(), data);
                         } else
-                        	block.setType(Material.AIR);
+                        	WorldEdits.setType(block, Material.AIR);
                     }
                 }, 5);
             }
@@ -1367,7 +1368,7 @@ public class LegacyAgent extends Agent {
                                 all.playSound(block.getLocation(), sound, SoundCategory.BLOCKS, 1, 1);
                         }
 
-                        block.breakNaturally();
+                        WorldEdits.breakNaturally(block);
 
                         if (wrapper.getLevel() == LegacyLevel.ABOVE) {
                             noJump.add(player);
@@ -1394,7 +1395,7 @@ public class LegacyAgent extends Agent {
                         return;
 
                     if (LegacyMats.INSTANT_BREAK.contains(block.getType())) { // instant break blocks
-                        block.breakNaturally();
+                        WorldEdits.breakNaturally(block);
                         return;
                     }
 
@@ -1469,7 +1470,7 @@ public class LegacyAgent extends Agent {
 
         bot.look(BlockFace.DOWN);
         bot.punch();
-        loc.getBlock().setType(Material.WATER);
+        WorldEdits.setType(loc.getBlock(), Material.WATER);
         world.playSound(loc, Sound.ITEM_BUCKET_EMPTY, 1, 1);
 
         scheduleTaskLater(() -> {
@@ -1478,7 +1479,7 @@ public class LegacyAgent extends Agent {
             if (block.getType() == Material.WATER) {
                 bot.look(BlockFace.DOWN);
                 world.playSound(loc, Sound.ITEM_BUCKET_FILL, 1, 1);
-                block.setType(Material.AIR);
+                WorldEdits.setType(block, Material.AIR);
             }
         }, 5);
     }
@@ -1505,7 +1506,7 @@ public class LegacyAgent extends Agent {
                 bot.look(BlockFace.DOWN);
                 bot.punch();
                 world.playSound(loc, Sound.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 1, 1);
-                loc.getBlock().setType(Material.AIR);
+                WorldEdits.setType(loc.getBlock(), Material.AIR);
             }
         }
 
@@ -1533,7 +1534,7 @@ public class LegacyAgent extends Agent {
                 bot.look(BlockFace.DOWN);
                 bot.punch();
                 world.playSound(head, Sound.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 1, 1);
-                head.getBlock().setType(Material.AIR);
+                WorldEdits.setType(head.getBlock(), Material.AIR);
             } else {
                 placeWaterDown(bot, world, head);
             }
@@ -1547,7 +1548,7 @@ public class LegacyAgent extends Agent {
             bot.look(BlockFace.DOWN);
             bot.punch();
             world.playSound(under, Sound.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 1, 1);
-            place.setType(Material.AIR);
+            WorldEdits.setType(place, Material.AIR);
         }
 
         Location under2 = loc.clone().add(0, -2, 0);

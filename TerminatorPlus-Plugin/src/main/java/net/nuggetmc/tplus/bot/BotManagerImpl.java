@@ -316,7 +316,7 @@ public class BotManagerImpl implements BotManager, Listener {
             if (finalAttempt) {
                 TerminatorPlus.getInstance().getLogger().severe("Could not respawn bot " + state.name()
                         + " near " + describe(state.spawnLocation()) + " or at world spawn after "
-                        + attempt + " attempts. Use /bot setspawn to give bots a safe spawn point.");
+                        + attempt + " attempts. Use /tbot setspawn to give bots a safe spawn point.");
                 return;
             }
             TerminatorPlus.getInstance().getLogger().warning("No safe respawn spot for " + state.name()

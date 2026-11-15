@@ -99,7 +99,7 @@ final class RespawnSafety {
     }
 
     /**
-     * Respawn location for a {@code /bot setspawn} point. Mid-air points are
+     * Respawn location for a {@code /tbot setspawn} point. Mid-air points are
      * kept exactly as set while they are still clear with ground below.
      */
     static Location resolvePinned(Location pinned) {

@@ -635,11 +635,11 @@ public final class BotManagementUI implements Listener {
         put(session, 17, Material.BOOK, "Help / plugin info", UiAction.OPEN_HELP, null,
                 "Show existing help and plugin information");
         put(session, 19, Material.ENDER_PEARL, "Gather all", UiAction.BOT_GATHER, null,
-                "/bot move gather");
+                "/tbot move gather");
         put(session, 20, Material.COMPASS, "Circular scatter", UiAction.BOT_SCATTER, null,
-                "/bot move scatter (default radius)");
+                "/tbot move scatter (default radius)");
         put(session, 21, Material.PAPER, "Count bots", UiAction.BOT_COUNT, null,
-                "/bot inspect list");
+                "/tbot inspect list");
     }
 
     private void renderBots(Session session) {
@@ -695,23 +695,23 @@ public final class BotManagementUI implements Listener {
         }
         if (uniqueName) {
             put(session, 11, Material.PAPER, "Bot info", UiAction.BOT_INFO, bot.getBotName(),
-                    "/bot inspect info " + bot.getBotName());
+                    "/tbot inspect info " + bot.getBotName());
             put(session, 12, Material.REDSTONE, "AI info", UiAction.AI_INFO, bot.getBotName(),
                     "/ai inspect info " + bot.getBotName());
             put(session, 13, Material.DIAMOND_SWORD, "Weapon status", UiAction.BOT_WEAPONS, bot.getBotName(),
-                    "/bot inspect weapons " + bot.getBotName());
+                    "/tbot inspect weapons " + bot.getBotName());
         }
         UUID exactBotId = botId(bot);
         if (exactBotId != null) {
             put(session, 14, Material.CHEST, "Edit inventory: " + bot.getBotName(), UiAction.BOT_INVENTORY,
-                    exactBotId.toString(), "/bot equipment inventory <exact selected bot>",
+                    exactBotId.toString(), "/tbot equipment inventory <exact selected bot>",
                     "UUID: " + exactBotId);
         }
         if (uniqueName) {
             put(session, 15, Material.OBSERVER, "Combat debug on", UiAction.BOT_COMBAT_DEBUG,
-                    bot.getBotName() + " on", "/bot debug combat " + bot.getBotName() + " on");
+                    bot.getBotName() + " on", "/tbot debug combat " + bot.getBotName() + " on");
             put(session, 16, Material.BARRIER, "Combat debug off", UiAction.BOT_COMBAT_DEBUG,
-                    bot.getBotName() + " off", "/bot debug combat " + bot.getBotName() + " off");
+                    bot.getBotName() + " off", "/tbot debug combat " + bot.getBotName() + " off");
             put(session, 17, Material.SHULKER_BOX, "Apply loadout...", UiAction.BOT_LOADOUT, null,
                     "Enter loadout [bot-name]");
         }
@@ -744,18 +744,18 @@ public final class BotManagementUI implements Listener {
         if (admin) {
             put(session, 13, Material.TOTEM_OF_UNDYING,
                     "Respawn: " + (respawnEnabled ? "enabled" : "disabled"), UiAction.BOT_RESPAWN, null,
-                    "/bot settings auto-respawn");
+                    "/tbot settings auto-respawn");
             put(session, 14, Material.LIME_DYE, "Enable respawn", UiAction.BOT_RESPAWN, "true",
-                    "/bot settings auto-respawn true");
+                    "/tbot settings auto-respawn true");
             put(session, 15, Material.RED_DYE, "Disable respawn", UiAction.BOT_RESPAWN, "false",
-                    "/bot settings auto-respawn false");
+                    "/tbot settings auto-respawn false");
             put(session, 16, Material.FEATHER,
                     "Movement V2: " + (movementV2Enabled ? "enabled" : "disabled"), UiAction.BOT_MOVEMENT_V2, "status",
-                    "/bot settings movement-v2 status");
+                    "/tbot settings movement-v2 status");
             put(session, 17, Material.LIME_WOOL, "Enable Movement V2", UiAction.BOT_MOVEMENT_V2, "on",
-                    "/bot settings movement-v2 on");
+                    "/tbot settings movement-v2 on");
             put(session, 18, Material.RED_WOOL, "Disable Movement V2", UiAction.BOT_MOVEMENT_V2, "off",
-                    "/bot settings movement-v2 off");
+                    "/tbot settings movement-v2 off");
         }
     }
 
@@ -802,7 +802,7 @@ public final class BotManagementUI implements Listener {
 
     private void renderCombat(Session session) {
         put(session, 10, Material.DIAMOND_SWORD, "Weapons (all)", UiAction.BOT_WEAPONS, null,
-                "/bot inspect weapons");
+                "/tbot inspect weapons");
         String selectedName = selectedName(session);
         boolean uniqueSelected = isUniqueBotName(selectedName,
                 currentBots().stream().map(Terminator::getBotName).toList());
@@ -810,7 +810,7 @@ public final class BotManagementUI implements Listener {
                 uniqueSelected ? "Weapons (selected)" : "Selected weapons unavailable",
                 uniqueSelected ? UiAction.BOT_WEAPONS : null,
                 uniqueSelected ? selectedName : null,
-                uniqueSelected ? "/bot inspect weapons <selected bot>"
+                uniqueSelected ? "/tbot inspect weapons <selected bot>"
                         : "The selected bot name is ambiguous.");
         put(session, 12, Material.CHEST, "Give item...", UiAction.BOT_GIVE, null,
                 "item [bot-name] [slot]");
@@ -823,7 +823,7 @@ public final class BotManagementUI implements Listener {
         put(session, 16, Material.ENDER_CHEST, "Loadout mix...", UiAction.BOT_LOADOUT_MIX, null,
                 "alltypes, core, or problem [bot-prefix]");
         put(session, 17, Material.BOOK, "List presets", UiAction.BOT_PRESET_LIST, null,
-                "/bot preset list");
+                "/tbot preset list");
         put(session, 18, Material.WRITABLE_BOOK, "Save preset...", UiAction.BOT_PRESET_SAVE, null,
                 "preset-name bot-name");
         put(session, 19, Material.ENCHANTED_BOOK, "Apply preset...", UiAction.BOT_PRESET_APPLY, null,
@@ -838,10 +838,10 @@ public final class BotManagementUI implements Listener {
         } else {
             put(session, 21, Material.CHEST, selectedName == null ? "Open inventory..." : "Open selected inventory",
                     selectedName == null ? UiAction.BOT_INVENTORY_INPUT : UiAction.BOT_INVENTORY,
-                    selectedName, selectedName == null ? "Enter bot-name" : "/bot equipment inventory <selected bot>");
+                    selectedName, selectedName == null ? "Enter bot-name" : "/tbot equipment inventory <selected bot>");
         }
         put(session, 22, Material.PAPER, "Count bots", UiAction.BOT_COUNT, null,
-                "/bot inspect list");
+                "/tbot inspect list");
     }
 
     private void renderAdmin(Session session) {
@@ -851,13 +851,13 @@ public final class BotManagementUI implements Listener {
                     "Confirmation and permission recheck required");
         }
         put(session, 11, Material.LIME_DYE, "Mob targeting on", UiAction.BOT_SETTINGS, "mobtarget true",
-                "/bot settings target-mobs true");
+                "/tbot settings target-mobs true");
         put(session, 12, Material.RED_DYE, "Mob targeting off", UiAction.BOT_SETTINGS, "mobtarget false",
-                "/bot settings target-mobs false");
+                "/tbot settings target-mobs false");
         put(session, 13, Material.LIME_DYE, "Player-list on", UiAction.BOT_SETTINGS, "addplayerlist true",
-                "/bot settings show-in-player-list true");
+                "/tbot settings show-in-player-list true");
         put(session, 14, Material.RED_DYE, "Player-list off", UiAction.BOT_SETTINGS, "addplayerlist false",
-                "/bot settings show-in-player-list false");
+                "/tbot settings show-in-player-list false");
         put(session, 15, Material.COMPASS, "Set target goal...", UiAction.BOT_SETTINGS_INPUT, null,
                 "combat-goal value");
         put(session, 16, Material.BEACON, "Set region...", UiAction.BOT_SETTINGS_REGION_INPUT, null,
@@ -868,9 +868,9 @@ public final class BotManagementUI implements Listener {
             put(session, 18, Material.COMPARATOR, "Debug expression...", UiAction.BOT_DEBUG, null,
                     "Enter a behavior expression");
             put(session, 19, Material.OBSERVER, "Combat debug all on", UiAction.BOT_COMBAT_DEBUG, "all on",
-                    "/bot debug combat all on");
+                    "/tbot debug combat all on");
             put(session, 20, Material.REDSTONE_TORCH, "Combat debug all off", UiAction.BOT_COMBAT_DEBUG, "all off",
-                    "/bot debug combat all off");
+                    "/tbot debug combat all off");
             put(session, 21, Material.PAPER, "Combat debug args...", UiAction.BOT_COMBAT_DEBUG_INPUT, null,
                     "bot-name|all on|off");
         }
@@ -878,11 +878,11 @@ public final class BotManagementUI implements Listener {
 
     private void renderEnvironment(Session session) {
         put(session, 10, Material.BOOK, "Environment help", UiAction.ENV_HELP, null,
-                "/bot environment");
+                "/tbot environment");
         put(session, 11, Material.BOOK, "Block help", UiAction.ENV_HELP, "blocks",
-                "/bot environment solid-block");
+                "/tbot environment solid-block");
         put(session, 12, Material.BOOK, "Mob help", UiAction.ENV_HELP, "mobs",
-                "/bot environment custom-mob");
+                "/tbot environment custom-mob");
         put(session, 13, Material.COMPASS, "Get material...", UiAction.ENV_GET_MATERIAL, null,
                 "x y z (relative values supported)");
         put(session, 14, Material.BRICKS, "Add solid...", UiAction.ENV_ADD_SOLID, null,
@@ -890,7 +890,7 @@ public final class BotManagementUI implements Listener {
         put(session, 15, Material.BARRIER, "Remove solid...", UiAction.ENV_REMOVE_SOLID, null,
                 "material or x y z");
         put(session, 16, Material.PAPER, "List solids", UiAction.ENV_LIST_SOLIDS, null,
-                "/bot environment solid-block list");
+                "/tbot environment solid-block list");
         put(session, 17, Material.TNT, "Clear solids", UiAction.ENV_CLEAR_SOLIDS, null,
                 "Confirmation required");
         put(session, 18, Material.ZOMBIE_HEAD, "Add custom mob...", UiAction.ENV_ADD_CUSTOM_MOB, null,
@@ -898,14 +898,14 @@ public final class BotManagementUI implements Listener {
         put(session, 19, Material.BARRIER, "Remove custom mob...", UiAction.ENV_REMOVE_CUSTOM_MOB, null,
                 "entity type");
         put(session, 20, Material.PAPER, "List custom mobs", UiAction.ENV_LIST_CUSTOM_MOBS, null,
-                "/bot environment custom-mob list");
+                "/tbot environment custom-mob list");
         put(session, 21, Material.TNT, "Clear custom mobs", UiAction.ENV_CLEAR_CUSTOM_MOBS, null,
                 "Confirmation required");
         put(session, 22, Material.COMPARATOR, "Mob list type...", UiAction.ENV_MOB_LIST_TYPE, null,
                 "custom list mode");
         if (hasAdminPermission(session)) {
             put(session, 23, Material.FEATHER, "Movement V2 status", UiAction.ENV_MOVEMENT_V2_STATUS, null,
-                    "/bot debug movement [bot-name]");
+                    "/tbot debug movement [bot-name]");
         }
     }
 
@@ -915,11 +915,11 @@ public final class BotManagementUI implements Listener {
         put(session, 11, Material.WRITABLE_BOOK, "Upload debug info", UiAction.MAIN_DEBUG_INFO, null,
                 "/terminatorplus debuginfo");
         put(session, 12, Material.PLAYER_HEAD, "Bot command help", UiAction.BOT_HELP, null,
-                "/bot");
+                "/tbot");
         put(session, 13, Material.REDSTONE, "AI command help", UiAction.AI_HELP, null,
                 "/ai");
         put(session, 14, Material.GRASS_BLOCK, "Environment help", UiAction.ENV_HELP, null,
-                "/bot environment");
+                "/tbot environment");
     }
 
     private void renderConfirmation(Session session) {

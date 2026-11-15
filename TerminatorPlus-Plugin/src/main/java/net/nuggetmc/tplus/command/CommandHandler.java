@@ -41,7 +41,8 @@ public class CommandHandler {
     private void registerCommands() {
         registerCommands(
                 new MainCommand(this, "terminatorplus", "The TerminatorPlus main command.", "tplus"),
-                new BotCommand(this, "bot", "The root command for bot management.", "npc"),
+                // NodesKrieg: /tbot, so /tbot stays free for nkDuels' "fight a bot"
+                new BotCommand(this, "tbot", "The root command for bot management.", "tnpc"),
                 new AICommand(this, "ai", "The root command for bot AI training."),
                 new BotEnvironmentCommand(this, "botenvironment", "Do /botenvironment help for more information.", "botenv")
         );

@@ -3,12 +3,14 @@ main: net.nuggetmc.tplus.TerminatorPlus
 version: ${version}
 api-version: 1.16 # Set to 1.16 so the plugin loads, and we can tell the user that it may not be compatible with their version, because people can't scroll up.
 author: HorseNuggets
+# NodesKrieg fork (wBots): fires and reloads xc guns and uses xc bandages through xc's BotGunApi when xc is installed
+softdepend: [xc]
 
 commands:
-  bot:
+  tbot:
     description: Root command for bot management (spawning, inventory, loadouts, presets).
-    aliases: [npc]
-    usage: /bot
+    aliases: [tnpc]
+    usage: /tbot
   terminatorplus:
     description: Plugin-level command (debug info, version).
     aliases: [tplus]

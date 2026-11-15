@@ -11,7 +11,7 @@ java {
 }
 
 dependencies {
-    paperweight.paperDevBundle("26.3.build.+")
+    paperweight.paperDevBundle("26.3.build.223-stable")
 
     implementation(project(":TerminatorPlus-API"))
 

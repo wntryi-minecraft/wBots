@@ -1,5 +1,6 @@
 package net.nuggetmc.tplus.bot.combat;
 
+import net.nuggetmc.tplus.api.WorldEdits;
 import net.nuggetmc.tplus.TerminatorPlus;
 import net.nuggetmc.tplus.bot.Bot;
 import net.nuggetmc.tplus.bot.loadout.BotInventory;
@@ -2390,7 +2391,7 @@ public final class OpportunityScanner {
                                 "scanner-cobweb-setType-release:" + source, slot);
                         Material previous = block.getType();
                         CombatDebugger.blockPlace(bot, source, material, block, previous);
-                        block.setType(material);
+                        WorldEdits.setType(block, material);
                     });
             if (!started) {
                 CombatDebugger.log(bot, "cobweb-cancel",
@@ -2400,7 +2401,7 @@ public final class OpportunityScanner {
         }
         Material previous = block.getType();
         CombatDebugger.blockPlace(bot, source, material, block, previous);
-        block.setType(material);
+        WorldEdits.setType(block, material);
     }
 
     private static boolean armorNeedsRepair(Bot bot) {
@@ -2433,7 +2434,7 @@ public final class OpportunityScanner {
             // Only clear if the block is still what we placed (avoid clobbering
             // something a player or another bot placed in the meantime).
             if (block.getType() == original) {
-                block.setType(replacement);
+                WorldEdits.setType(block, replacement);
             }
         }, delayTicks);
     }
