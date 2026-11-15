@@ -47,6 +47,7 @@ public final class XcCombatBehavior {
         int nextReload;
         int emptyReloads;       // reloads asked for in a row that left the gun empty (no ammo left)
         boolean dry;            // out of ammo for good: fight with the blade
+        int nextRetreatRoll;    // when it next considers running off to bandage
         Vector aimError = new Vector();
         boolean sneaking;
     }
@@ -119,17 +120,35 @@ public final class XcCombatBehavior {
         if (alive < st.busyUntil) return true;  // still bandaging: changing the held item would cancel it
 
         double max = maxHealth(self);
+        boolean hurt = self.getHealth() < max * BANDAGE_BELOW;
+        // low and the target is not on it: now and then run off to bandage out of reach (a player backs off to heal)
+        if (bot.usesBandages() && hurt && !bot.retreating() && alive >= st.nextBandage && alive >= st.nextRetreatRoll
+                && distance > BLADE_RANGE + 1.5 && find(inv, it -> test(isConsumable, it)) >= 0) {
+            st.nextRetreatRoll = alive + 20;
+            if (ThreadLocalRandom.current().nextDouble() < 0.5) {
+                bot.setRetreatUntil(alive + 80);
+                CombatDebugger.log(bot, "xc-retreat", "hp=" + String.format("%.1f", self.getHealth()));
+            }
+        }
         if (bot.usesBandages() && self.getHealth() < max * BANDAGE_BELOW && alive >= st.nextBandage
                 && (distance >= BANDAGE_DISTANCE || !self.hasLineOfSight(target))) {
             int slot = find(inv, it -> test(isConsumable, it));
             if (slot >= 0 && inv.selectMainInventorySlot(slot) >= 0 && Boolean.TRUE.equals(call(useConsumable, self))) {
                 unsneak(bot, st);
                 st.busyUntil = alive + 30;
+                bot.setRetreatUntil(-1);
+                bot.setHoldUntil(alive + 30);
                 st.nextBandage = alive + 100;
                 st.aimTicks = 0;
                 CombatDebugger.log(bot, "xc-bandage", "hp=" + String.format("%.1f", self.getHealth()));
                 return true;
             }
+        }
+
+        // running off: no shooting over the shoulder; caught in blade reach it fights back
+        if (bot.retreating() && distance > BLADE_RANGE) {
+            unsneak(bot, st);
+            return true;
         }
 
         int gunSlot = st.dry ? -1 : find(inv, it -> test(isGun, it));

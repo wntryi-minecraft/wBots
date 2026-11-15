@@ -201,6 +201,12 @@ public class LegacyAgent extends Agent {
         bot.tickCommittedCombat(livingTarget);
         planRoutedCombat(bot, livingTarget, movementMode);
 
+        // NodesKrieg: duel bots move like a duelling player up close (no hop-chase); far away the planner below paths
+        if (bot.duelFootwork(livingTarget)) {
+            executeRoutedCombat(bot, livingTarget, movementMode);
+            return;
+        }
+
         // Disabled-by-default Movement V2 gets first refusal only for the
         // modern legacy/controller movement modes. Returning false preserves
         // the obstacle shell and NN fallback below exactly as before.

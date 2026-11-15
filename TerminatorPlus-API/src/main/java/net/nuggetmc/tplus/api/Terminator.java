@@ -110,6 +110,18 @@ public interface Terminator {
     default void setHumanLimits(int swingGapMin, int swingGapMax, double missChance, boolean advancedPlay, double speedFactor) {
     }
 
+    /**
+     * NodesKrieg: duel mode. The bot walks like a duelling player within 10 blocks of its target (closes in, strafes, keeps
+     * a gunfight's distance, retreats to bandage) instead of the legacy hop-chase, and only jumps to climb a block.
+     */
+    default void setDuelMode(boolean on) {
+    }
+
+    /** NodesKrieg: one tick of duel footwork against [target]; false when the bot is not in duel mode or the target is far. */
+    default boolean duelFootwork(LivingEntity target) {
+        return false;
+    }
+
     /** NodesKrieg: health the bot regains per tick on its own (players with full food get about 1 per 80 ticks). */
     default void setRegenPerTick(double regen) {
     }

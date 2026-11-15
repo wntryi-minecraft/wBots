@@ -261,6 +261,92 @@ public class Bot extends ServerPlayer implements Terminator {
         this.speedFactor = Math.max(0.3, Math.min(1.5, speedFactor));
     }
 
+    // NodesKrieg duel footwork (see Terminator.setDuelMode)
+    private boolean duelMode;
+    private boolean footworkThisTick;
+    private int strafeDir = 1;
+    private int strafeSwitchTick;
+    private int retreatUntil = -1;
+    private int holdUntil = -1;
+
+    @Override
+    public void setDuelMode(boolean on) {
+        this.duelMode = on;
+    }
+
+    /** Runs away from the target until [tick] (to bandage out of reach). */
+    public void setRetreatUntil(int tick) { this.retreatUntil = tick; }
+    public boolean retreating() { return aliveTicks < retreatUntil; }
+    /** Stands still until [tick] (a bandage is cancelled by walking off). */
+    public void setHoldUntil(int tick) { this.holdUntil = tick; }
+
+    @Override
+    public boolean duelFootwork(org.bukkit.entity.LivingEntity target) {
+        if (!duelMode || target == null || !target.isValid() || !isAlive() || isBotInWater()) return false;
+        Location me = getLocation(), them = target.getLocation();
+        if (!me.getWorld().equals(them.getWorld())) return false;
+        Vector toward = them.toVector().subtract(me.toVector()).setY(0);
+        double dist = toward.length();
+        toward = dist < 1.0e-3 ? new Vector(1, 0, 0) : toward.multiply(1.0 / dist);
+        if (aliveTicks >= strafeSwitchTick) {
+            strafeDir = java.util.concurrent.ThreadLocalRandom.current().nextBoolean() ? 1 : -1;
+            strafeSwitchTick = aliveTicks + 15 + java.util.concurrent.ThreadLocalRandom.current().nextInt(30);
+        }
+        Vector side = toward.clone().rotateAroundY(Math.PI / 2 * strafeDir);
+
+        if (aliveTicks < holdUntil) {
+            setSprinting(false);
+            footworkStep(new Vector(), 0);
+            return true;
+        }
+        if (aliveTicks < retreatUntil) {
+            setSprinting(true);
+            Vector run = toward.clone().multiply(-1).add(side.clone().multiply(0.35));
+            faceLocation(me.clone().add(run));   // a player running off looks where they run
+            footworkStep(run, 0.28);
+            return true;
+        }
+        CombatIntent intent = getCombatIntent();
+        boolean ranged = intent != null && intent.branchFamily() == net.nuggetmc.tplus.bot.combat.MovementBranchFamily.PROJECTILE_RANGED;
+        double desired = ranged ? 11.0 : 2.6;
+        // far beyond its fighting distance the route planner paths around cover (it would hop-chase inside it)
+        if (dist > Math.max(10.0, desired + 4.0)) return false;
+        // a duelling player keeps their eyes on the opponent (attacks and gun aim re-face on top of this)
+        faceLocation(me.clone().add(target.getEyeLocation().toVector().subtract(getBukkitEntity().getEyeLocation().toVector())));
+        if (dist > desired + 0.6) {
+            boolean sprint = dist > desired + 2.0;
+            setSprinting(sprint);
+            footworkStep(toward.clone().add(side.clone().multiply(ranged ? 0.5 : 0.2)), sprint ? 0.28 : 0.216);
+        } else if (dist < desired - 0.8) {
+            setSprinting(false);
+            footworkStep(toward.clone().multiply(-1).add(side.clone().multiply(0.3)), 0.2);
+        } else {
+            setSprinting(false);
+            footworkStep(side.clone().add(toward.clone().multiply(0.1)), 0.18);
+        }
+        return true;
+    }
+
+    /** Walks [dir] at [speed] blocks per tick this tick (no ground friction on it), hopping up a one-block step in the way. */
+    private void footworkStep(Vector dir, double speed) {
+        Vector v = dir.clone().setY(0);
+        if (speed <= 0 || v.lengthSquared() < 1.0e-6) {
+            walkRoute(new Vector());
+            footworkThisTick = true;
+            return;
+        }
+        v.normalize().multiply(speed);
+        walkRoute(v);
+        footworkThisTick = true;
+        if (isBotOnGround()) {
+            Location ahead = getLocation().add(v.clone().normalize().multiply(0.8));
+            boolean step = ahead.getBlock().getType().isSolid()
+                    && !ahead.clone().add(0, 1, 0).getBlock().getType().isSolid()
+                    && !getLocation().add(0, 2, 0).getBlock().getType().isSolid();
+            if (step) jump(new Vector(v.getX(), 0.42, v.getZ()));
+        }
+    }
+
     /** False when this bot plays without crit setups, sprint-reset hits, combos and punish plays. */
     public boolean advancedPlay() { return advancedPlay; }
     // NodesKrieg: for a few ticks after a hit the knockback owns the bot's horizontal motion (a player cannot walk
@@ -569,12 +655,12 @@ public class Bot extends ServerPlayer implements Terminator {
         int buildingBlocks = PlayerTraversalActionExecutor.countBuildingBlocks(botInventory);
         MovementV2Planner.Capabilities capabilities = new MovementV2Planner.Capabilities(
                 movementV2Flag("allow-open", true),
-                movementV2Flag("allow-place", true) && buildingBlocks > 0,
-                movementV2Flag("allow-pillar", true) && buildingBlocks > 0,
+                movementV2Flag("allow-place", true) && buildingBlocks > 0 && net.nuggetmc.tplus.api.WorldEdits.allowed(),
+                movementV2Flag("allow-pillar", true) && buildingBlocks > 0 && net.nuggetmc.tplus.api.WorldEdits.allowed(),
                 movementV2Flag("allow-parkour", true),
                 movementV2Flag("allow-clutch-drop", true)
-                        && PlayerTraversalActionExecutor.hasClutchItem(this),
-                movementV2Flag("allow-break", true),
+                        && PlayerTraversalActionExecutor.hasClutchItem(this) && net.nuggetmc.tplus.api.WorldEdits.allowed(),
+                movementV2Flag("allow-break", true) && net.nuggetmc.tplus.api.WorldEdits.allowed(),
                 buildingBlocks
         );
         long maxMicros = Math.max(1L, Math.min(50_000L,
@@ -1149,7 +1235,8 @@ public class Bot extends ServerPlayer implements Terminator {
         } else {
             if (groundTicks != 0) {
                 velocity.setY(0);
-                addFriction(0.5);
+                // footwork sets the per-tick walking speed itself; everything else keeps the old ground friction
+                if (!footworkThisTick || aliveTicks < knockbackUntil) addFriction(0.5);
                 y = 0;
             } else {
                 y = velocity.getY();
@@ -1163,6 +1250,7 @@ public class Bot extends ServerPlayer implements Terminator {
                 }
             }
         }
+        footworkThisTick = false;
         // NodesKrieg: the duel speed factor scales every own step (walking, sprinting, jumps), never knockback
         double step = aliveTicks < knockbackUntil ? 1.0 : speedFactor;
         this.move(MoverType.SELF, new Vec3(velocity.getX() * step, y, velocity.getZ() * step));
