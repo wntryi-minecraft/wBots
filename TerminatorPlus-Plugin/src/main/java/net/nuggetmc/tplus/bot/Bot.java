@@ -308,6 +308,21 @@ public class Bot extends ServerPlayer implements Terminator {
         getBotInventory().markLoadoutApplied();
     }
 
+    /** Distance from the eyes to the nearest point of [entity]'s hitbox, as vanilla measures reach. */
+    private double reachTo(org.bukkit.entity.Entity entity) {
+        org.bukkit.util.Vector eye = getBukkitEntity().getEyeLocation().toVector();
+        org.bukkit.util.BoundingBox box = entity.getBoundingBox();
+        double x = Math.max(box.getMinX(), Math.min(eye.getX(), box.getMaxX()));
+        double y = Math.max(box.getMinY(), Math.min(eye.getY(), box.getMaxY()));
+        double z = Math.max(box.getMinZ(), Math.min(eye.getZ(), box.getMaxZ()));
+        return eye.distance(new org.bukkit.util.Vector(x, y, z));
+    }
+
+    private double interactionRange() {
+        org.bukkit.attribute.AttributeInstance a = getBukkitEntity().getAttribute(org.bukkit.attribute.Attribute.ENTITY_INTERACTION_RANGE);
+        return a != null ? a.getValue() : 3.0;
+    }
+
     public double getAimErrorDegrees() { return aimErrorDegrees; }
     public int getAimTicks() { return aimTicks; }
     public boolean usesBandages() { return useBandages; }
@@ -1123,6 +1138,11 @@ public class Bot extends ServerPlayer implements Terminator {
                 if(jumpTicks - 3 <= 0) {
                     velocity.setY(Math.max(y - 0.08, -3.5));
                 }
+                // NodesKrieg: vanilla air drag while knockback carries the bot, so a hit does not fling it across the arena
+                if (aliveTicks < knockbackUntil) {
+                    velocity.setX(velocity.getX() * 0.91);
+                    velocity.setZ(velocity.getZ() * 0.91);
+                }
             }
         }
         this.move(MoverType.SELF, new Vec3(velocity.getX(), y, velocity.getZ()));
@@ -1313,9 +1333,15 @@ public class Bot extends ServerPlayer implements Terminator {
 
     @Override
     public void attack(org.bukkit.entity.Entity entity) {
-        // NodesKrieg: no hits through walls: a player cannot reach what they cannot see
+        // NodesKrieg: no hits through walls (a player cannot reach what they cannot see) and vanilla reach: from the
+        // eyes to the nearest point of the target's hitbox, at most the entity interaction range (3 blocks unless a
+        // weapon's attribute changes it)
         if (!getBukkitEntity().hasLineOfSight(entity)) {
             CombatDebugger.log(this, "attack-skip", "reason=no-line-of-sight");
+            return;
+        }
+        if (reachTo(entity) > interactionRange()) {
+            CombatDebugger.log(this, "attack-skip", "reason=out-of-reach reach=" + fmt(reachTo(entity)));
             return;
         }
         faceLocation(entity.getLocation());
@@ -1716,6 +1742,10 @@ public class Bot extends ServerPlayer implements Terminator {
 
         float beforeHp = getHealth();
         boolean damaged = super.hurtServer(worldServer, damagesource, damage);
+        // NodesKrieg: vanilla also pushed the NMS motion and marked it for a motion packet; the bot moves by its own
+        // velocity (kb below), so that packet only made viewers' clients jump the bot ahead and snap it back
+        setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+        syncVelocity = false;
         float afterHp = getHealth();
         if (damaged) {
             double actualDamage = Math.max(0.0, beforeHp - afterHp);
